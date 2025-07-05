@@ -117,7 +117,7 @@ export default function LandingPage() {
             aria-label={lang === 'es' ? 'Ir a la sección de contacto' : 'Go to contact section'}
           >
             {t("cta")}
-            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform self-center" />
           </a>
           <a 
             href="#services" 
@@ -125,7 +125,7 @@ export default function LandingPage() {
             aria-label={lang === 'es' ? 'Ir a la sección de servicios' : 'Go to services section'}
           >
             {t("learn_more")}
-            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform self-center" />
           </a>
         </motion.div>
       </section>
@@ -383,7 +383,7 @@ export default function LandingPage() {
               aria-label={lang === 'es' ? 'Enviar email a MMD Lab' : 'Send email to MMD Lab'}
             >
               Email
-              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform self-center" />
             </a>
             <a 
               href="https://wa.me/34604925311" 
@@ -393,7 +393,7 @@ export default function LandingPage() {
               aria-label={lang === 'es' ? 'Contactar por WhatsApp' : 'Contact via WhatsApp'}
             >
               WhatsApp
-              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform self-center" />
             </a>
           </div>
         </motion.div>
