@@ -121,10 +121,11 @@ export default function LandingPage() {
           </a>
           <a 
             href="#services" 
-            className="inline-flex items-center gap-2 rounded-2xl border border-purple-500/30 bg-purple-500/10 px-8 py-4 text-lg font-semibold hover:bg-purple-500/20 transition-all duration-300"
+            className="group inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 px-8 py-4 text-lg font-semibold shadow-2xl hover:shadow-purple-500/25 transition-all duration-300 hover:scale-105"
             aria-label={lang === 'es' ? 'Ir a la sección de servicios' : 'Go to services section'}
           >
             {t("learn_more")}
+            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
           </a>
         </motion.div>
       </section>
