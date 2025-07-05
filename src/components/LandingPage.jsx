@@ -1,11 +1,14 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Brain, Bot, Cloud, ArrowRight } from "lucide-react";
+import { Brain, Bot, Cloud, ArrowRight, Search, Layout, Link2, TrendingUp } from "lucide-react";
 import React from 'react';
+import en from '../i18n/en.json';
+import es from '../i18n/es.json';
 
 export default function LandingPage() {
   const [lang, setLang] = useState("en");
-  const t = (key) => translations[key][lang];
+  const dict = { en, es };
+  const t = (key) => dict[lang][key];
 
   // Enhanced cursor glow effect
   const [coords, setCoords] = useState({ x: -100, y: -100 });
@@ -66,6 +69,7 @@ export default function LandingPage() {
                 ? "bg-purple-600/20 text-purple-300 border border-purple-500/30" 
                 : "opacity-60 hover:opacity-100 hover:bg-white/5"
             }`}
+            aria-label="Switch language to English"
           >
             EN
           </button>
@@ -76,6 +80,7 @@ export default function LandingPage() {
                 ? "bg-purple-600/20 text-purple-300 border border-purple-500/30" 
                 : "opacity-60 hover:opacity-100 hover:bg-white/5"
             }`}
+            aria-label="Cambiar idioma a español"
           >
             ES
           </button>
@@ -109,6 +114,7 @@ export default function LandingPage() {
           <a 
             href="#contact" 
             className="group inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 px-8 py-4 text-lg font-semibold shadow-2xl hover:shadow-purple-500/25 transition-all duration-300 hover:scale-105"
+            aria-label={lang === 'es' ? 'Ir a la sección de contacto' : 'Go to contact section'}
           >
             {t("cta")}
             <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
@@ -116,6 +122,7 @@ export default function LandingPage() {
           <a 
             href="#services" 
             className="inline-flex items-center gap-2 rounded-2xl border border-purple-500/30 bg-purple-500/10 px-8 py-4 text-lg font-semibold hover:bg-purple-500/20 transition-all duration-300"
+            aria-label={lang === 'es' ? 'Ir a la sección de servicios' : 'Go to services section'}
           >
             {t("learn_more")}
           </a>
@@ -184,6 +191,175 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Alternating Steps Section */}
+      {/* Workflow/process section is fully internationalized using translation keys from i18n JSON files. */}
+      <section className="relative z-10 max-w-5xl mx-auto my-24">
+        <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 bg-gradient-to-r from-white to-purple-300 bg-clip-text text-transparent">
+          {t('workflow_title')}
+        </h2>
+        <div className="relative flex flex-col gap-6 md:gap-4">
+          {/* Vertical timeline line (desktop only, always behind connectors) */}
+          <div className="hidden md:block absolute left-1/2 top-0 bottom-0 w-1 -translate-x-1/2 bg-white/80 z-0 rounded-full" />
+          {/* Step 1 */}
+          <div className="flex flex-col md:flex-row items-center md:items-center relative z-10">
+            {/* Left box */}
+            <div className="w-full md:w-1/2 flex flex-col items-end pr-0 md:pr-8">
+              <div className="flex items-center gap-4 bg-slate-900/60 border border-purple-500/20 rounded-2xl p-6 shadow-lg max-w-md">
+                <div className="bg-gradient-to-br from-purple-600 to-indigo-600 rounded-xl p-3">
+                  <Search className="w-8 h-8 text-white" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-xl font-extrabold text-white">1.</span>
+                    {/* Step 1 title from translations */}
+                    <h3 className="text-xl font-bold">{t('step1_title')}</h3>
+                  </div>
+                  {/* Step 1 description from translations */}
+                  <p className="text-slate-300 text-sm">{t('step1_desc')}</p>
+                </div>
+              </div>
+            </div>
+            {/* Timeline column (desktop only) */}
+            <div className="hidden md:flex flex-col items-center justify-center w-0 relative z-10">
+              <span className="timeline-connector-left" />
+            </div>
+            <div className="hidden md:block w-1/2" />
+          </div>
+          {/* Step 2 */}
+          <div className="flex flex-col md:flex-row items-center md:items-center relative z-10">
+            <div className="hidden md:block w-1/2" />
+            <div className="hidden md:flex flex-col items-center justify-center w-0 relative z-10">
+              <span className="timeline-connector-right" />
+            </div>
+            <div className="w-full md:w-1/2 flex flex-col items-start pl-0 md:pl-8">
+              <div className="flex items-center gap-4 bg-slate-900/60 border border-purple-500/20 rounded-2xl p-6 shadow-lg max-w-md">
+                <div className="bg-gradient-to-br from-purple-600 to-indigo-600 rounded-xl p-3">
+                  <Layout className="w-8 h-8 text-white" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-xl font-extrabold text-white">2.</span>
+                    {/* Step 2 title from translations */}
+                    <h3 className="text-xl font-bold">{t('step2_title')}</h3>
+                  </div>
+                  {/* Step 2 description from translations */}
+                  <p className="text-slate-300 text-sm">{t('step2_desc')}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          {/* Step 3 */}
+          <div className="flex flex-col md:flex-row items-center md:items-center relative z-10">
+            {/* Left box */}
+            <div className="w-full md:w-1/2 flex flex-col items-end pr-0 md:pr-8">
+              <div className="flex items-center gap-4 bg-slate-900/60 border border-purple-500/20 rounded-2xl p-6 shadow-lg max-w-md">
+                <div className="bg-gradient-to-br from-purple-600 to-indigo-600 rounded-xl p-3">
+                  <Link2 className="w-8 h-8 text-white" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-xl font-extrabold text-white">3.</span>
+                    {/* Step 3 title from translations */}
+                    <h3 className="text-xl font-bold">{t('step3_title')}</h3>
+                  </div>
+                  {/* Step 3 description from translations */}
+                  <p className="text-slate-300 text-sm">{t('step3_desc')}</p>
+                </div>
+              </div>
+            </div>
+            <div className="hidden md:flex flex-col items-center justify-center w-0 relative z-10">
+              <span className="timeline-connector-left" />
+            </div>
+            <div className="hidden md:block w-1/2" />
+          </div>
+          {/* Step 4 */}
+          <div className="flex flex-col md:flex-row items-center md:items-center relative z-10">
+            <div className="hidden md:block w-1/2" />
+            <div className="hidden md:flex flex-col items-center justify-center w-0 relative z-10">
+              <span className="timeline-connector-right" />
+            </div>
+            <div className="w-full md:w-1/2 flex flex-col items-start pl-0 md:pl-8">
+              <div className="flex items-center gap-4 bg-slate-900/60 border border-purple-500/20 rounded-2xl p-6 shadow-lg max-w-md">
+                <div className="bg-gradient-to-br from-purple-600 to-indigo-600 rounded-xl p-3">
+                  <TrendingUp className="w-8 h-8 text-white" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-xl font-extrabold text-white">4.</span>
+                    {/* Step 4 title from translations */}
+                    <h3 className="text-xl font-bold">{t('step4_title')}</h3>
+                  </div>
+                  {/* Step 4 description from translations */}
+                  <p className="text-slate-300 text-sm">{t('step4_desc')}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        {/* Timeline connector styles */}
+        <style jsx>{`
+          @media (min-width: 768px) {
+            .timeline-connector-left, .timeline-connector-right {
+              position: relative;
+              display: flex;
+              align-items: center;
+              height: 100%;
+              min-height: 0;
+            }
+            .timeline-connector-left::before {
+              content: '';
+              position: absolute;
+              right: 100%;
+              top: 50%;
+              transform: translateY(-50%);
+              width: 40px;
+              height: 3px;
+              background: white;
+              border-radius: 2px;
+              margin-right: -2px;
+            }
+            .timeline-connector-left::after {
+              content: '';
+              position: absolute;
+              right: -8px;
+              top: 50%;
+              transform: translateY(-50%);
+              width: 16px;
+              height: 16px;
+              background: white;
+              border: 3px solid #c4b5fd;
+              border-radius: 50%;
+              z-index: 2;
+            }
+            .timeline-connector-right::before {
+              content: '';
+              position: absolute;
+              left: 100%;
+              top: 50%;
+              transform: translateY(-50%);
+              width: 40px;
+              height: 3px;
+              background: white;
+              border-radius: 2px;
+              margin-left: -2px;
+            }
+            .timeline-connector-right::after {
+              content: '';
+              position: absolute;
+              left: -8px;
+              top: 50%;
+              transform: translateY(-50%);
+              width: 16px;
+              height: 16px;
+              background: white;
+              border: 3px solid #c4b5fd;
+              border-radius: 50%;
+              z-index: 2;
+            }
+          }
+        `}</style>
+      </section>
+
       {/* Contact Section */}
       <section id="contact" className="relative z-10 mt-32 mb-24 text-center px-6">
         <motion.div
@@ -203,6 +379,7 @@ export default function LandingPage() {
             <a 
               href="mailto:info@mmdlab.tech" 
               className="group inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 px-8 py-4 text-lg font-semibold shadow-2xl hover:shadow-purple-500/25 transition-all duration-300 hover:scale-105"
+              aria-label={lang === 'es' ? 'Enviar email a MMD Lab' : 'Send email to MMD Lab'}
             >
               Email
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
@@ -212,6 +389,7 @@ export default function LandingPage() {
               target="_blank"
               rel="noopener noreferrer"
               className="group inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 px-8 py-4 text-lg font-semibold shadow-2xl hover:shadow-purple-500/25 transition-all duration-300 hover:scale-105"
+              aria-label={lang === 'es' ? 'Contactar por WhatsApp' : 'Contact via WhatsApp'}
             >
               WhatsApp
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
@@ -239,84 +417,9 @@ const services = [
 const stats = [
   { value: "38", label: "projects_completed" },
   { value: "99%", label: "client_satisfaction" },
-  { value: "24/7", label: "support_available" },
-  { value: "5+", label: "years_experience" },
+  { value: "EN/ES", label: "bilingual_support" },
+  { value: "∞", label: "possible_integrations" },
 ];
-
-const translations = {
-  tagline: {
-    es: "Soluciones inteligentes que aceleran tu negocio",
-    en: "Smart solutions to accelerate your business",
-  },
-  sub: {
-    es: "Agentes de IA, automatización e integraciones Cloud",
-    en: "AI Agents, Automation and Cloud Integrations",
-  },
-  cta: {
-    es: "Hablemos",
-    en: "Let's talk",
-  },
-  learn_more: {
-    es: "Saber más",
-    en: "Learn more",
-  },
-  services_title: {
-    es: "Nuestros Servicios",
-    en: "Our Services",
-  },
-  services_sub: {
-    es: "Soluciones especializadas para impulsar tu transformación digital",
-    en: "Specialized solutions to drive your digital transformation",
-  },
-  training_title: {
-    es: "Formación Técnica",
-    en: "Technical Training",
-  },
-  training_desc: {
-    es: "Workshops prácticos y mentoring personalizado para equipos que quieren ir un paso por delante en tecnología.",
-    en: "Hands-on workshops and personalized mentoring to keep your team ahead of the technology curve.",
-  },
-  automation_title: {
-    es: "Agentes IA & Automatización",
-    en: "AI Agents & Automation",
-  },
-  automation_desc: {
-    es: "Diseñamos y desplegamos agentes de IA y flujos de automatización que ahorran horas de trabajo manual.",
-    en: "We design and deploy AI Agents & Automation flows that save hours of manual work.",
-  },
-  cloud_title: {
-    es: "Integraciones Cloud",
-    en: "Cloud Integrations",
-  },
-  cloud_desc: {
-    es: "Conectamos tus aplicaciones con una infraestructura robusta y escalable.",
-    en: "We connect your applications to robust and scalable infrastructure.",
-  },
-  contact_title: {
-    es: "¿Listo para empezar?",
-    en: "Ready to get started?",
-  },
-  contact_sub: {
-    es: "Cuéntame tu reto y te responderé con una propuesta personalizada.",
-    en: "Tell me about your challenge and get a personalized proposal.",
-  },
-  projects_completed: {
-    es: "Proyectos Completados",
-    en: "Projects Completed",
-  },
-  client_satisfaction: {
-    es: "Satisfacción Cliente",
-    en: "Client Satisfaction",
-  },
-  support_available: {
-    es: "Soporte Disponible",
-    en: "Support Available",
-  },
-  years_experience: {
-    es: "Años Experiencia",
-    en: "Years Experience",
-  },
-};
 
 // Component for related counters
 // Slow animation: 2 seconds per unit
@@ -324,19 +427,19 @@ const translations = {
 function AnimatedCounters({ lang }) {
   const [hours, setHours] = useState(100);
   const [money, setMoney] = useState(10000);
-  // Animación lenta: 2 segundos por unidad
+  // Slow animation: 2 seconds per unit
   React.useEffect(() => {
     if (hours < 300) {
       const timeout = setTimeout(() => setHours(hours + 1), 2000);
       return () => clearTimeout(timeout);
     }
   }, [hours]);
-  // Animar dinero de 1 en 1, sincronizado con las horas
+  // Animate money by 1 each time, synchronized with hours
   React.useEffect(() => {
     const target = hours * 100;
     const diff = target - money;
     if (diff > 0) {
-      const intervalMs = 2000 / diff; // reparte los 2s entre los euros que faltan
+      const intervalMs = 2000 / diff; // distribute the 2s among the remaining dollars/euros
       const interval = setInterval(() => {
         setMoney((prev) => {
           if (prev + 1 >= target) return target;
@@ -360,7 +463,7 @@ function AnimatedCounters({ lang }) {
         <div className="text-sm text-slate-400">{labels.time[lang]}</div>
       </div>
       <div className="text-center">
-        <div className="text-3xl md:text-4xl font-bold text-purple-400 mb-2">€{money.toLocaleString()}</div>
+        <div className="text-3xl md:text-4xl font-bold text-purple-400 mb-2">{lang === 'es' ? '€' : '$'}{money.toLocaleString()}</div>
         <div className="text-sm text-slate-400">{labels.money[lang]}</div>
       </div>
       <div className="text-center">
