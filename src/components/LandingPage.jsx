@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Brain, Bot, Cloud, ArrowRight } from "lucide-react";
+import React from 'react';
 
 export default function LandingPage() {
   const [lang, setLang] = useState("en");
@@ -122,7 +123,7 @@ export default function LandingPage() {
       </section>
 
       {/* Stats Section */}
-      <section className="relative z-10 mt-32 px-6 max-w-6xl mx-auto">
+      <section className="relative z-10 mt-20 px-6 max-w-6xl mx-auto">
         <motion.div 
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -176,6 +177,10 @@ export default function LandingPage() {
               </div>
             </motion.div>
           ))}
+        </div>
+        {/* Animated Counters below services */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-10">
+          <AnimatedCounters lang={lang} />
         </div>
       </section>
 
@@ -244,8 +249,8 @@ const translations = {
     en: "Smart solutions to accelerate your business",
   },
   sub: {
-    es: "Formación técnica, agentes de IA, automatización e integraciones Cloud.",
-    en: "Technical Training, AI Agents & Automation and Cloud integrations",
+    es: "Agentes de IA, automatización e integraciones Cloud",
+    en: "AI Agents, Automation and Cloud Integrations",
   },
   cta: {
     es: "Hablemos",
@@ -311,4 +316,57 @@ const translations = {
     es: "Años Experiencia",
     en: "Years Experience",
   },
-}; 
+};
+
+// Component for related counters
+// Slow animation: 2 seconds per unit
+// Animate money by 1 each time, synchronized with hours
+function AnimatedCounters({ lang }) {
+  const [hours, setHours] = useState(100);
+  const [money, setMoney] = useState(10000);
+  // Animación lenta: 2 segundos por unidad
+  React.useEffect(() => {
+    if (hours < 300) {
+      const timeout = setTimeout(() => setHours(hours + 1), 2000);
+      return () => clearTimeout(timeout);
+    }
+  }, [hours]);
+  // Animar dinero de 1 en 1, sincronizado con las horas
+  React.useEffect(() => {
+    const target = hours * 100;
+    const diff = target - money;
+    if (diff > 0) {
+      const intervalMs = 2000 / diff; // reparte los 2s entre los euros que faltan
+      const interval = setInterval(() => {
+        setMoney((prev) => {
+          if (prev + 1 >= target) return target;
+          return prev + 1;
+        });
+      }, intervalMs);
+      return () => clearInterval(interval);
+    }
+  }, [hours, money]);
+  const rawProductivity = 2 + (hours - 100) * 0.5;
+  const productivity = Number.isInteger(rawProductivity) ? rawProductivity : rawProductivity.toFixed(1);
+  const labels = {
+    time: { es: 'Gana tiempo', en: 'Save time' },
+    money: { es: 'Ahorra dinero', en: 'Save money' },
+    productivity: { es: 'Productividad', en: 'Productivity' },
+  };
+  return (
+    <>
+      <div className="text-center">
+        <div className="text-3xl md:text-4xl font-bold text-purple-400 mb-2">{hours}h</div>
+        <div className="text-sm text-slate-400">{labels.time[lang]}</div>
+      </div>
+      <div className="text-center">
+        <div className="text-3xl md:text-4xl font-bold text-purple-400 mb-2">€{money.toLocaleString()}</div>
+        <div className="text-sm text-slate-400">{labels.money[lang]}</div>
+      </div>
+      <div className="text-center">
+        <div className="text-3xl md:text-4xl font-bold text-purple-400 mb-2">{productivity}x</div>
+        <div className="text-sm text-slate-400">{labels.productivity[lang]}</div>
+      </div>
+    </>
+  );
+} 
