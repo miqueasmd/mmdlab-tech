@@ -21,6 +21,12 @@ jobs:
     - run: npm ci
     - run: npm run build
 
+    - name: Copy CNAME into build
+      run: cp public/CNAME build/
+
+    - name: Copy .nojekyll into build
+      run: cp public/.nojekyll build/
+
     - uses: actions/upload-pages-artifact@v3
       with:
         path: ./build
