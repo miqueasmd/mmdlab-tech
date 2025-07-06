@@ -25,5 +25,14 @@
   "step3_title": "Integración",
   "step3_desc": "Conectamos tus herramientas y automatizamos tus procesos.",
   "step4_title": "Optimización",
-  "step4_desc": "Monitorizamos, mejoramos y escalamos tus automatizaciones."
+  "step4_desc": "Monitorizamos, mejoramos y escalamos tus automatizaciones.",
+  "legal_notice": "Aviso Legal",
+  "privacy_policy": "Política de Privacidad",
+  "legal_notice_title": "Aviso Legal",
+  "legal_notice_owner": "Titular del sitio: Miqueas Molina Delgado",
+  "legal_notice_email": "Email de contacto:",
+  "legal_notice_activity": "Actividad: Portfolio y página de contacto. Todos los servicios profesionales se contratan a través de la plataforma Upwork, que gestiona facturación y pagos.",
+  "privacy_policy_title": "Política de Privacidad",
+  "privacy_policy_data": "Los datos que el usuario envía (email o mensaje) se usan únicamente para responder a su consulta.",
+  "privacy_policy_storage": "No se almacenan en bases de datos externas ni se ceden a terceros."
 } 

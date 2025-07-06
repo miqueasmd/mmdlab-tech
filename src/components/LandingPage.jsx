@@ -1,12 +1,14 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Brain, Bot, Cloud, ArrowRight, Search, Layout, Link2, TrendingUp } from "lucide-react";
+import { Brain, Bot, Cloud, ArrowRight, Search, Layout, Link2, TrendingUp, X } from "lucide-react";
 import React from 'react';
 import en from '../i18n/en.json';
 import es from '../i18n/es.json';
 
 export default function LandingPage() {
   const [lang, setLang] = useState("en");
+  const [showLegalNotice, setShowLegalNotice] = useState(false);
+  const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
   const dict = { en, es };
   const t = (key) => dict[lang][key];
 
@@ -401,10 +403,86 @@ export default function LandingPage() {
 
       {/* Footer */}
       <footer className="relative z-10 text-center py-8 border-t border-purple-500/20">
-        <p className="text-slate-400">
-          © 2025 MMD Lab • <a href="https://miqueasmd.github.io" target="_blank" rel="noopener noreferrer" className="text-purple-400 hover:text-purple-300 transition-colors">Portfolio</a>
-        </p>
+        <div className="max-w-4xl mx-auto px-6">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-4">
+            <p className="text-slate-400">
+              © 2025 MMD Lab • <a href="https://miqueasmd.github.io" target="_blank" rel="noopener noreferrer" className="text-purple-400 hover:text-purple-300 transition-colors">Portfolio</a>
+            </p>
+            <div className="flex gap-6 text-sm">
+              <button 
+                onClick={() => setShowLegalNotice(true)}
+                className="text-slate-400 hover:text-purple-400 transition-colors"
+              >
+                {t("legal_notice")}
+              </button>
+              <button 
+                onClick={() => setShowPrivacyPolicy(true)}
+                className="text-slate-400 hover:text-purple-400 transition-colors"
+              >
+                {t("privacy_policy")}
+              </button>
+            </div>
+          </div>
+        </div>
       </footer>
+
+      {/* Legal Notice Modal */}
+      {showLegalNotice && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            className="bg-slate-900/95 backdrop-blur-md border border-purple-500/20 rounded-2xl p-8 max-w-2xl w-full max-h-[80vh] overflow-y-auto"
+          >
+            <div className="flex justify-between items-start mb-6">
+              <h2 className="text-2xl font-bold text-white">{t("legal_notice_title")}</h2>
+              <button
+                onClick={() => setShowLegalNotice(false)}
+                className="text-slate-400 hover:text-white transition-colors p-2"
+              >
+                <X size={24} />
+              </button>
+            </div>
+            <div className="space-y-4 text-slate-300">
+              <p>{t("legal_notice_owner")}</p>
+              <p>
+                {t("legal_notice_email")}{" "}
+                <a href="mailto:info@mmdlab.tech" className="text-purple-400 hover:text-purple-300 transition-colors">
+                  info@mmdlab.tech
+                </a>
+              </p>
+              <p>{t("legal_notice_activity")}</p>
+            </div>
+          </motion.div>
+        </div>
+      )}
+
+      {/* Privacy Policy Modal */}
+      {showPrivacyPolicy && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            className="bg-slate-900/95 backdrop-blur-md border border-purple-500/20 rounded-2xl p-8 max-w-2xl w-full max-h-[80vh] overflow-y-auto"
+          >
+            <div className="flex justify-between items-start mb-6">
+              <h2 className="text-2xl font-bold text-white">{t("privacy_policy_title")}</h2>
+              <button
+                onClick={() => setShowPrivacyPolicy(false)}
+                className="text-slate-400 hover:text-white transition-colors p-2"
+              >
+                <X size={24} />
+              </button>
+            </div>
+            <div className="space-y-4 text-slate-300">
+              <p>{t("privacy_policy_data")}</p>
+              <p>{t("privacy_policy_storage")}</p>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 }

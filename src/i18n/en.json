@@ -25,5 +25,14 @@
   "step3_title": "Integration",
   "step3_desc": "We connect your tools and automate your processes.",
   "step4_title": "Optimization",
-  "step4_desc": "We monitor, improve, and scale your automations."
+  "step4_desc": "We monitor, improve, and scale your automations.",
+  "legal_notice": "Legal Notice",
+  "privacy_policy": "Privacy Policy",
+  "legal_notice_title": "Legal Notice",
+  "legal_notice_owner": "Site Owner: Miqueas Molina Delgado",
+  "legal_notice_email": "Contact Email:",
+  "legal_notice_activity": "Activity: Portfolio and contact page. All professional services are contracted through the Upwork platform, which manages billing and payments.",
+  "privacy_policy_title": "Privacy Policy",
+  "privacy_policy_data": "The data that users send (email or message) is used solely to respond to their inquiry.",
+  "privacy_policy_storage": "It is not stored in external databases nor shared with third parties."
 } 
