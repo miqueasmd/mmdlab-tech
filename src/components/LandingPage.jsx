@@ -406,7 +406,7 @@ export default function LandingPage() {
         <div className="max-w-4xl mx-auto px-6">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-4">
             <p className="text-slate-400">
-              © 2025 MMD Lab • <a href="https://miqueasmd.github.io" target="_blank" rel="noopener noreferrer" className="text-purple-400 hover:text-purple-300 transition-colors">Portfolio</a>
+              © 2025 MMD Lab • <a href="https://portfolio.mmdlab.tech" target="_blank" rel="noopener noreferrer" className="text-purple-400 hover:text-purple-300 transition-colors">Portfolio</a>
             </p>
             <div className="flex gap-6 text-sm">
               <button 
