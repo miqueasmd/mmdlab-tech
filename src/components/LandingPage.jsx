@@ -207,7 +207,7 @@ export default function LandingPage() {
           <div className="flex flex-col md:flex-row items-center md:items-center relative z-10">
             {/* Left box */}
             <div className="w-full md:w-1/2 flex flex-col items-end pr-0 md:pr-8">
-              <div className="flex items-center gap-4 bg-slate-900/60 border border-purple-500/20 rounded-2xl p-6 shadow-lg max-w-md">
+              <div className="flex items-center gap-4 bg-slate-900/60 border border-purple-500/20 rounded-2xl p-6 shadow-lg w-full md:max-w-md">
                 <div className="bg-gradient-to-br from-purple-600 to-indigo-600 rounded-xl p-3">
                   <Search className="w-8 h-8 text-white" />
                 </div>
@@ -235,7 +235,7 @@ export default function LandingPage() {
               <span className="timeline-connector-right" />
             </div>
             <div className="w-full md:w-1/2 flex flex-col items-start pl-0 md:pl-8">
-              <div className="flex items-center gap-4 bg-slate-900/60 border border-purple-500/20 rounded-2xl p-6 shadow-lg max-w-md">
+              <div className="flex items-center gap-4 bg-slate-900/60 border border-purple-500/20 rounded-2xl p-6 shadow-lg w-full md:max-w-md">
                 <div className="bg-gradient-to-br from-purple-600 to-indigo-600 rounded-xl p-3">
                   <Layout className="w-8 h-8 text-white" />
                 </div>
@@ -255,7 +255,7 @@ export default function LandingPage() {
           <div className="flex flex-col md:flex-row items-center md:items-center relative z-10">
             {/* Left box */}
             <div className="w-full md:w-1/2 flex flex-col items-end pr-0 md:pr-8">
-              <div className="flex items-center gap-4 bg-slate-900/60 border border-purple-500/20 rounded-2xl p-6 shadow-lg max-w-md">
+              <div className="flex items-center gap-4 bg-slate-900/60 border border-purple-500/20 rounded-2xl p-6 shadow-lg w-full md:max-w-md">
                 <div className="bg-gradient-to-br from-purple-600 to-indigo-600 rounded-xl p-3">
                   <Link2 className="w-8 h-8 text-white" />
                 </div>
@@ -282,7 +282,7 @@ export default function LandingPage() {
               <span className="timeline-connector-right" />
             </div>
             <div className="w-full md:w-1/2 flex flex-col items-start pl-0 md:pl-8">
-              <div className="flex items-center gap-4 bg-slate-900/60 border border-purple-500/20 rounded-2xl p-6 shadow-lg max-w-md">
+              <div className="flex items-center gap-4 bg-slate-900/60 border border-purple-500/20 rounded-2xl p-6 shadow-lg w-full md:max-w-md">
                 <div className="bg-gradient-to-br from-purple-600 to-indigo-600 rounded-xl p-3">
                   <TrendingUp className="w-8 h-8 text-white" />
                 </div>
