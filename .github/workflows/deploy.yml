@@ -1,42 +1,68 @@
-name: Deploy React App to GitHub Pages
+# The name of the workflow as it will appear in the "Actions" tab of your GitHub repository.
+name: Deploy Website to GitHub Pages
 
+# --- TRIGGERS ---
+# This section defines when the workflow will run.
 on:
+  # Runs on every push to the 'main' branch.
   push:
     branches: [ "main" ]
+  
+  # Allows you to run this workflow manually from the Actions tab.
   workflow_dispatch:
 
+# --- PERMISSIONS ---
+# Sets the permissions granted to the GITHUB_TOKEN for this workflow.
+# This follows the principle of least privilege for better security.
 permissions:
   contents: read
   pages: write
   id-token: write
 
+# --- JOBS ---
+# A workflow run is made up of one or more jobs that run in parallel or sequentially.
 jobs:
-  deploy:
-    runs-on: ubuntu-latest
+  # The first job is called 'build'. It prepares the website files.
+  build:
+    runs-on: ubuntu-latest # Specifies that this job runs on a fresh Ubuntu virtual machine.
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - name: Checkout repository code
+        uses: actions/checkout@v4 # Action to download your repository code into the runner.
 
-      - name: Setup Node.js
+      - name: Setup Node.js environment
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: 20 # Sets up the specified version of Node.js.
+          cache: 'npm' # Enables caching for npm dependencies to speed up future runs.
 
       - name: Install dependencies
-        run: npm install
+        # 'npm ci' is a clean install, faster and more reliable for automation than 'npm install'.
+        run: npm ci
 
       - name: Build static site
+        # Runs the 'build' script from your package.json file to create the production files.
         run: npm run build
 
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
-
-      - name: Upload artifact
+      - name: Upload production artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: './build'
+          # Specifies the folder that contains the built website to be deployed.
+          # IMPORTANT: Change './dist' to './build' if your project uses that folder name.
+          path: './build' 
 
+  # The second job is called 'deploy'. It publishes the website.
+  deploy:
+    # This job will only run if the 'build' job completes successfully.
+    needs: build
+    
+    # Sets up the deployment environment within GitHub for better tracking and security.
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    runs-on: ubuntu-latest # This job also runs on a fresh Ubuntu machine.
+    steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4 
+        # This official GitHub action takes the artifact from the 'build' job and deploys it.
+        uses: actions/deploy-pages@v4
