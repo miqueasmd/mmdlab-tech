@@ -498,9 +498,9 @@ export default function LandingPage() {
 }
 
 const services = [
-  { icon: Brain, key: "training" },
   { icon: Bot, key: "automation" },
   { icon: Cloud, key: "cloud" },
+  { icon: Brain, key: "training" },
 ];
 
 const stats = [
