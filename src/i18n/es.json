@@ -31,7 +31,11 @@
   "legal_notice_title": "Aviso Legal",
   "legal_notice_owner": "Titular del sitio: Miqueas Molina Delgado",
   "legal_notice_email": "Email de contacto:",
-  "legal_notice_activity": "Actividad: Portfolio y página de contacto. Todos los servicios profesionales se contratan a través de la plataforma Upwork, que gestiona facturación y pagos.",
+  "legal_notice_activity": "Actividad: servicios profesionales de automatización de procesos, agentes de IA, integraciones cloud y formación técnica para empresas y profesionales. Los servicios se contratan directamente o a través de plataformas como Upwork y Malt.",
+  "legal_notice_platforms": "Perfiles profesionales:",
+  "upwork_profile": "Perfil en Upwork",
+  "malt_profile": "Perfil en Malt",
+  "footer_owner": "Web de Miqueas Molina Delgado",
   "privacy_policy_title": "Política de Privacidad",
   "privacy_policy_data": "Los datos que el usuario envía (email o mensaje) se usan únicamente para responder a su consulta.",
   "privacy_policy_storage": "No se almacenan en bases de datos externas ni se ceden a terceros."
