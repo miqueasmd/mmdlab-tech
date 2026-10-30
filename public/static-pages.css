@@ -1,0 +1,442 @@
+/* Shared styles for the static pages (servicios-web, aviso-legal, privacidad).
+   They copy the look of the React landing page (slate and purple, system fonts)
+   but load nothing external, so they work without JavaScript. */
+
+:root {
+  --bg: #0f172a;
+  --bg-mid: #581c87;
+  --text: #f8fafc;
+  --muted: #cbd5e1;
+  --subtle: #94a3b8;
+  --accent: #a78bfa;
+  --accent-soft: #c4b5fd;
+  --btn-from: #7c3aed;
+  --btn-to: #4f46e5;
+  --card: rgba(30, 41, 59, 0.45);
+  --line: rgba(168, 85, 247, 0.24);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell,
+    "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+  line-height: 1.6;
+  color: var(--text);
+  background-color: var(--bg);
+  background-image: linear-gradient(135deg, var(--bg) 0%, var(--bg-mid) 50%, var(--bg) 100%);
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: var(--accent);
+}
+
+a:hover {
+  color: var(--accent-soft);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent-soft);
+  outline-offset: 3px;
+}
+
+.skip {
+  position: absolute;
+  left: -9999px;
+}
+
+.skip:focus {
+  left: 16px;
+  top: 16px;
+  z-index: 10;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: #fff;
+  color: #111827;
+}
+
+.wrap {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* Header */
+
+.site-header .wrap {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 24px;
+  padding-top: 22px;
+  padding-bottom: 22px;
+}
+
+.brand {
+  font-size: 1.75rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  color: #fff;
+  text-decoration: none;
+}
+
+.brand span {
+  color: var(--accent);
+}
+
+.site-header nav,
+.site-footer nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+}
+
+.site-header nav a {
+  color: var(--muted);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.site-header nav a:hover,
+.site-header nav a[aria-current="page"] {
+  color: #fff;
+}
+
+/* Hero */
+
+.hero {
+  padding: 64px 0 32px;
+  text-align: center;
+}
+
+.eyebrow {
+  display: inline-block;
+  margin-bottom: 22px;
+  padding: 6px 14px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: 0.85rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent-soft);
+}
+
+.hero h1 {
+  max-width: 900px;
+  margin: 0 auto 20px;
+  font-size: clamp(2.1rem, 5vw, 3.5rem);
+  line-height: 1.12;
+  color: #fff;
+}
+
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  .hero h1 {
+    background: linear-gradient(90deg, #fff 0%, #e9d5ff 55%, var(--accent) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+}
+
+.lead {
+  max-width: 760px;
+  margin: 0 auto;
+  font-size: clamp(1.08rem, 2.2vw, 1.3rem);
+  color: var(--muted);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 14px;
+  margin-top: 32px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 26px;
+  border-radius: 16px;
+  font-weight: 600;
+  color: #fff;
+  text-decoration: none;
+  background: linear-gradient(90deg, var(--btn-from), var(--btn-to));
+  box-shadow: 0 10px 30px rgba(124, 58, 237, 0.25);
+}
+
+.btn:hover {
+  color: #fff;
+  filter: brightness(1.1);
+}
+
+.btn.ghost {
+  border: 1px solid var(--line);
+  background: transparent;
+  box-shadow: none;
+  color: var(--muted);
+}
+
+.btn.ghost:hover {
+  color: #fff;
+}
+
+/* Sections */
+
+.section {
+  padding: 52px 0;
+}
+
+.section-title {
+  margin: 0 0 12px;
+  font-size: clamp(1.7rem, 3.4vw, 2.3rem);
+  line-height: 1.2;
+  text-align: center;
+}
+
+.section-sub {
+  max-width: 700px;
+  margin: 0 auto 36px;
+  text-align: center;
+  color: var(--muted);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+  gap: 22px;
+}
+
+/* Two columns on wide screens, so four cards make two even rows. */
+.grid.two {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr));
+}
+
+.card {
+  padding: 26px;
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: var(--card);
+}
+
+.card h3 {
+  margin: 0 0 10px;
+  font-size: 1.22rem;
+  line-height: 1.3;
+}
+
+.card p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.card p + p {
+  margin-top: 10px;
+}
+
+.icon {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  margin-bottom: 16px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, var(--btn-from), var(--btn-to));
+}
+
+.icon svg {
+  width: 26px;
+  height: 26px;
+  fill: none;
+  stroke: #fff;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.sector {
+  margin: 0 0 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent-soft);
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tags li {
+  padding: 3px 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: 0.8rem;
+  color: var(--accent-soft);
+}
+
+.steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr));
+  gap: 18px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: step;
+}
+
+.steps li {
+  padding: 22px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--card);
+  color: var(--muted);
+  counter-increment: step;
+}
+
+.steps li::before {
+  content: counter(step);
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  margin-bottom: 12px;
+  border-radius: 50%;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(135deg, var(--btn-from), var(--btn-to));
+}
+
+.steps strong {
+  display: block;
+  margin-bottom: 4px;
+  color: #fff;
+}
+
+.contact {
+  text-align: center;
+}
+
+/* Legal pages */
+
+.legal {
+  max-width: 820px;
+  padding-top: 24px;
+  padding-bottom: 56px;
+}
+
+.legal h1 {
+  margin: 0 0 6px;
+  font-size: clamp(2rem, 4vw, 2.6rem);
+  line-height: 1.2;
+}
+
+.legal h2 {
+  margin: 36px 0 10px;
+  font-size: 1.3rem;
+}
+
+.legal p,
+.legal li {
+  color: var(--muted);
+}
+
+.legal ul {
+  padding-left: 20px;
+}
+
+.updated {
+  margin-top: 0;
+  font-size: 0.95rem;
+  color: var(--subtle);
+}
+
+.data {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 10px 20px;
+  margin: 18px 0;
+  padding: 22px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--card);
+}
+
+.data dt {
+  font-weight: 600;
+  color: #fff;
+}
+
+.data dd {
+  margin: 0;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+
+/* Visible only while a value is still missing in a draft. */
+.pending {
+  padding: 0 6px;
+  border-radius: 6px;
+  background: #fde68a;
+  color: #1f2937;
+}
+
+/* Footer */
+
+.site-footer {
+  border-top: 1px solid var(--line);
+  padding: 28px 0 36px;
+  font-size: 0.95rem;
+  color: var(--subtle);
+}
+
+.site-footer .wrap {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 12px 24px;
+}
+
+.site-footer p {
+  margin: 0;
+}
+
+.site-footer nav a {
+  color: var(--subtle);
+  text-decoration: none;
+}
+
+.site-footer nav a:hover {
+  color: var(--accent);
+}
+
+@media (max-width: 560px) {
+  .hero {
+    padding-top: 40px;
+  }
+
+  .data {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+
+  .data dd {
+    margin-bottom: 10px;
+  }
+}
