@@ -6,7 +6,10 @@ import en from '../i18n/en.json';
 import es from '../i18n/es.json';
 
 export default function LandingPage() {
-  const [lang, setLang] = useState("en");
+  // Spanish for browsers set to Spanish, English for everyone else
+  const [lang, setLang] = useState(() =>
+    navigator.language?.toLowerCase().startsWith("es") ? "es" : "en"
+  );
   const dict = { en, es };
   const t = (key) => dict[lang][key];
 
