@@ -408,13 +408,13 @@ export default function LandingPage() {
             </p>
             {/* Static pages in public/, readable without JavaScript */}
             <div className="flex flex-wrap justify-center gap-6 text-sm">
-              <a href="/servicios-web/" className="text-slate-400 hover:text-purple-400 transition-colors">
+              <a href={lang === "es" ? "/servicios-web/" : "/en/web-services/"} className="text-slate-400 hover:text-purple-400 transition-colors">
                 {t("web_services")}
               </a>
-              <a href="/aviso-legal/" className="text-slate-400 hover:text-purple-400 transition-colors">
+              <a href={lang === "es" ? "/aviso-legal/" : "/en/legal-notice/"} className="text-slate-400 hover:text-purple-400 transition-colors">
                 {t("legal_notice")}
               </a>
-              <a href="/privacidad/" className="text-slate-400 hover:text-purple-400 transition-colors">
+              <a href={lang === "es" ? "/privacidad/" : "/en/privacy/"} className="text-slate-400 hover:text-purple-400 transition-colors">
                 {t("privacy_policy")}
               </a>
             </div>
