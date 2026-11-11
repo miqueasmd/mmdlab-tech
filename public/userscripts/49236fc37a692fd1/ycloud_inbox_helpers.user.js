@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         YCloud: ayudas para la bandeja (MMD Lab)
 // @namespace    https://mmdlab.tech/
-// @version      0.5.1
+// @version      0.5.2
 // @description  Vínculos cliente-vendedor que se pulsan, búsqueda por palabras o número y chats en espera en color en la bandeja de YCloud. Solo lee: no escribe nada.
 // @match        https://www.ycloud.com/console/*
 // @run-at       document-idle
@@ -29,7 +29,9 @@
  *      and under «Vendedor(es)» and «Cliente(s)» in a conversation's details. A click filters the inbox to that
  *      contact and opens its conversation; with several (one per business number) it asks which. It clicks only a row
  *      whose conversation it identifies by ID (one conversation among the row's current React props, its contact's name
- *      or number in the row's text), and checks that the chat opened is that one. Alt+V: the first link.
+ *      or number in the row's text), and checks that the chat opened is that one. When it identifies no row of that
+ *      contact, it asks the console how many conversations the contact has, open and closed, and says that (none at
+ *      all, only closed ones and when the last ended, or open ones it does not see), never a guess. Alt+V: the first link.
  *   2. Search (Alt+B, or the 🔎 button): contacts whose name or number has every word typed, in any order. A whole
  *      number must match exactly: the number in YCloud's answer is checked, and two contacts with it are ambiguous, so
  *      none is chosen. A piece of a number is looked for only among the contacts with an open conversation, because
@@ -142,6 +144,36 @@
     return conv;
   }
 
+  function countFromPage(res, tenantId, contactId) {
+    // how many conversations a page says one contact has: YCloud's own total when the page carries it (exact), else
+    // what the page shows (exact only when it shows none); a page with another contact's conversation is inconclusive
+    const conv = accountConversations(res, tenantId);
+    if (conv.some((c) => String(c.contactId) !== String(contactId))) throw new Error(INCONCLUSIVE);
+    const meta = res.data.meta;
+    const raw = meta && meta.total != null ? Number(meta.total) : NaN;
+    const total = Number.isInteger(raw) && raw >= 0 ? raw : null;          // anything else is as if no total came
+    if (total !== null && total > 0 && conv.length === 0) throw new Error(INCONCLUSIVE);   // a first page that shows none of a positive total is contradictory
+    if (total !== null && total >= conv.length) return { count: total, exact: true, newest: conv[0] || null };
+    return { count: conv.length, exact: conv.length === 0, newest: conv[0] || null };
+  }
+
+  function noRowsMessage(name, phone, open, closed, closedWhen) {
+    // what to say when the inbox was asked to filter by a contact and no row of that contact could be identified:
+    // the facts the console gave (open and closed counts), never a guess
+    const who = name + ' (' + phone + ')';
+    const some = (c, one, many) => (c.exact ? '' : 'al menos ') + (c.count === 1 ? one : c.count + ' ' + many);
+    if (open.count > 0) {
+      return who + ' tiene ' + some(open, 'una conversación abierta', 'conversaciones abiertas') + ' que no veo en la lista. '
+        + 'He pedido a la bandeja que filtre por este contacto; si no aparece, búscalo por su número.';
+    }
+    if (closed.count > 0) {
+      return who + ' no tiene ninguna conversación abierta; tiene ' + some(closed, 'una cerrada', 'cerradas')
+        + (closedWhen ? ', con última actividad el ' + closedWhen : '') + '. He pedido a la bandeja que filtre por este contacto; '
+        + 'cambia el estado a cerradas para verla, o búscalo por su número.';
+    }
+    return who + ' no tiene conversaciones en esta cuenta de YCloud, ni abiertas ni cerradas.';
+  }
+
   // reading React: the props a DOM element was drawn with, and the two copies React keeps of its fiber (one of them
   // can be stale: a row recycled for another conversation; what tells them apart is what the row shows)
   const reactKey = (el, prefix) => Object.keys(el).find((k) => k.startsWith(prefix));
@@ -187,7 +219,7 @@
   }
 
   const helpers = { plain, e164, splitNumbers, hasAllWords, searchPlan, waitState, pickContact, contactRecords,
-    contactCard, accountConversations, rowConversation, tenantStep, INCONCLUSIVE };
+    contactCard, accountConversations, countFromPage, noRowsMessage, rowConversation, tenantStep, INCONCLUSIVE };
   if (typeof module !== 'undefined' && module.exports) { module.exports = helpers; return; }   // node tests
   if (window.__mmdYcloudHelpers) return;                                                        // once per page
   window.__mmdYcloudHelpers = helpers;
@@ -310,6 +342,13 @@
       order: 'newest', status: 0, contactId, query: { filters: [], connector: 'AND' } }), account.tenant);
     if (conv[0] && String(conv[0].contactId) !== String(contactId)) throw new Error(INCONCLUSIVE);
     return conv[0] || null;
+  }
+
+  async function conversationCounts(contactId) {
+    // one contact's open and closed conversations, as the console counts them (the newest of each as well)
+    const page = async (status) => countFromPage(await read('/api/inbox/conversation/advancedSearch', { pageNo: 1,
+      pageSize: 1, order: 'newest', status, contactId, query: { filters: [], connector: 'AND' } }), account.tenant, contactId);
+    return { open: await page(1), closed: await page(0) };
   }
 
   async function pool(items, size, fn) {
@@ -561,7 +600,16 @@
       rows = now;
     }
     if (!rows.length) {
-      toast('La bandeja ya muestra solo a ' + contact.name + ', pero no identifico ninguna conversación suya en la lista (puede estar cerrada): no pulso nada.');
+      // no row of that contact identified: say what the console knows (open and closed counts), not a guess
+      let counts;
+      try { counts = await conversationCounts(contact.id); } catch (e) {
+        toast(contact.name + ' (' + contact.phone + '): no veo su conversación en la lista y no he podido comprobar cuántas tiene (' + e.message + ').');
+        return;
+      }
+      stillSame(epoch);
+      const newest = counts.closed.newest;
+      const t = newest ? (Number(newest.lastActivityAt) || Date.parse(newest.lastActivityAt)) : NaN;
+      toast(noRowsMessage(contact.name, contact.phone, counts.open, counts.closed, Number.isFinite(t) && t > 0 ? clock(t) : null));
       return;
     }
     if (rows.length === 1) { await clickAndCheck(rows[0].conv.id, contact, epoch); return; }
