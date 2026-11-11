@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         YCloud: ayudas para la bandeja (MMD Lab)
 // @namespace    https://mmdlab.tech/
-// @version      0.5.2
+// @version      0.5.3
 // @description  Vínculos cliente-vendedor que se pulsan, búsqueda por palabras o número y chats en espera en color en la bandeja de YCloud. Solo lee: no escribe nada.
 // @match        https://www.ycloud.com/console/*
 // @run-at       document-idle
@@ -32,7 +32,11 @@
  *      or number in the row's text), and checks that the chat opened is that one. When it identifies no row of that
  *      contact, it asks the console how many conversations the contact has, open and closed, and says that (none at
  *      all, only closed ones and when the last ended, or open ones it does not see), never a guess. Alt+V: the first link.
- *   2. Search (Alt+B, or the 🔎 button): contacts whose name or number has every word typed, in any order. A whole
+ *   2. Search (Alt+B, or the 🔎 button): contacts whose name or number has every word typed, in any order; the results
+ *      come while typing (half a second after the last key, from three characters) and on Enter; a change of the text
+ *      cancels the search in flight and clears what was shown, so nothing stale can be clicked. The console is asked
+ *      for the longest word typed, but a role word («vendedor», «cliente», in hundreds of names) only when nothing
+ *      else was typed. A whole
  *      number must match exactly: the number in YCloud's answer is checked, and two contacts with it are ambiguous, so
  *      none is chosen. A piece of a number is looked for only among the contacts with an open conversation, because
  *      the console finds numbers only when whole. It can keep all («Todos»), those with an open conversation on a
@@ -59,6 +63,7 @@
   const MARKS = /[̀-ͯ]/g;
   // for searching: capitals, no accents (Ñ -> N), single spaces
   const plain = (s) => String(s || '').normalize('NFD').replace(MARKS, '').toUpperCase().replace(/\s+/g, ' ').trim();
+  const ROLE_WORDS = /^(VENDEDOR|VENDEDORA|VENDEDORES|CLIENTE|CLIENTES)$/;   // in hundreds of names: a poor word to ask for
   function e164(raw) {
     const text = String(raw || '').trim();
     let digits = text.replace(/\D/g, '');
@@ -83,7 +88,11 @@
     const words = (exact ? text.replace(m[0], ' ') : text).split(/\s+/)
       .map((w) => (/^[+\d().-]+$/.test(w) ? w.replace(/\D/g, '') : w)).filter((w) => w.length > 1);
     const longest = (list) => [...list].sort((a, b) => b.length - a.length)[0] || null;
-    const condition = exact ? null : longest(words.filter((w) => /\D/.test(w))) || longest(words);
+    // the words that name a role are in hundreds of contacts («VENDEDOR …» is how sellers are named), so they are
+    // asked for only when nothing else was typed: any other word narrows the console's answer far more
+    const lettered = words.filter((w) => /\D/.test(w));
+    const telling = lettered.filter((w) => !ROLE_WORDS.test(plain(w)));
+    const condition = exact ? null : longest(telling) || longest(lettered) || longest(words);
     return { exact, words, condition, pieces: !exact && words.some((w) => /^\d{3,}$/.test(w)) };
   }
 
@@ -174,6 +183,37 @@
     return who + ' no tiene conversaciones en esta cuenta de YCloud, ni abiertas ni cerradas.';
   }
 
+  function makeSearchRuns() {
+    // one search at a time: starting a new one aborts the reads of the one before, and a run paints only while it is
+    // the current one, so a late answer never shows under newer text
+    let current = null, n = 0;
+    return {
+      start() { if (current) current.ctrl.abort(); current = { id: ++n, ctrl: new AbortController() }; return current; },
+      cancel() { if (current) current.ctrl.abort(); current = null; },
+      isCurrent(run) { return Boolean(run && current) && current.id === run.id && !run.ctrl.signal.aborted; },
+    };
+  }
+
+  function makeTyping({ delay, minChars, schedule, unschedule, search, invalidate }) {
+    // search while typing: «delay» after the last change of the text, from «minChars». A change of the text drops what
+    // was scheduled and invalidates what is shown and the search in flight, so nothing stale stays on screen; the text
+    // already shown is not searched again; Enter searches at once; a change of filter searches the current text at once
+    let timer = null, shownFor = '';
+    const drop = () => { if (timer !== null) { unschedule(timer); timer = null; } };
+    return {
+      input(text) {
+        const t = String(text || '').trim();
+        if (t === shownFor) { drop(); return false; }
+        drop(); invalidate(); shownFor = null;
+        if (t.length < minChars) return false;
+        timer = schedule(() => { timer = null; shownFor = t; search(t); }, delay);
+        return true;
+      },
+      enter(text) { drop(); const t = String(text || '').trim(); shownFor = t; search(t); },
+      filterChanged(text) { drop(); invalidate(); const t = String(text || '').trim(); shownFor = t; if (t) search(t); },
+    };
+  }
+
   // reading React: the props a DOM element was drawn with, and the two copies React keeps of its fiber (one of them
   // can be stale: a row recycled for another conversation; what tells them apart is what the row shows)
   const reactKey = (el, prefix) => Object.keys(el).find((k) => k.startsWith(prefix));
@@ -191,9 +231,11 @@
     const text = (el && el.innerText) || '';
     const digits = text.replace(/\D/g, '');
     const shown = (c) => {
-      const name = displayName(c.contact);
+      // the name as the team typed it can carry a trailing or a double space, which the row does not draw: compare
+      // both sides normalised (spaces collapsed, accents and case ignored)
+      const name = plain(displayName(c.contact));
       const phone = String(c.contact.phoneNumber || '').replace(/\D/g, '');
-      return Boolean((name && text.includes(name)) || (phone.length > 7 && digits.includes(phone)));
+      return Boolean((name && plain(text).includes(name)) || (phone.length > 7 && digits.includes(phone)));
     };
     const found = new Map();
     for (const start of copiesOf(el)) {
@@ -219,7 +261,8 @@
   }
 
   const helpers = { plain, e164, splitNumbers, hasAllWords, searchPlan, waitState, pickContact, contactRecords,
-    contactCard, accountConversations, countFromPage, noRowsMessage, rowConversation, tenantStep, INCONCLUSIVE };
+    contactCard, accountConversations, countFromPage, noRowsMessage, makeSearchRuns, makeTyping, rowConversation, tenantStep,
+    INCONCLUSIVE };
   if (typeof module !== 'undefined' && module.exports) { module.exports = helpers; return; }   // node tests
   if (window.__mmdYcloudHelpers) return;                                                        // once per page
   window.__mmdYcloudHelpers = helpers;
@@ -237,9 +280,9 @@
 
   // ---------------------------------------------------------------- the console's own calls
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-  const api = async (url, body) => {
+  const api = async (url, body, signal) => {
     const r = await fetch(url, body ? { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body) } : { credentials: 'include' });
+      body: JSON.stringify(body), signal } : { credentials: 'include', signal });
     if (!r.ok) throw new Error('YCloud respondió ' + r.status);
     return r.json();
   };
@@ -277,16 +320,16 @@
   const sameEpoch = (epoch) => account.active && account.epoch === epoch;
   function stillSame(epoch) { if (!sameEpoch(epoch)) throw new Error(STALE); }
 
-  async function read(url, body) {
+  async function read(url, body, signal) {
     const epoch = await guard();
-    const res = await api(url, body);
+    const res = await api(url, body, signal);
     stillSame(epoch);
     return res;
   }
 
-  async function contactByPhone(phone) {
+  async function contactByPhone(phone, signal) {
     return pickContact(await read('/api/contacts/search', { pageNo: 1, pageSize: 2,
-      query: { connector: 'AND', filters: [{ connector: 'AND', conditions: [{ column: 'Phone number', operator: 'IS', values: [phone] }] }] } }), phone);
+      query: { connector: 'AND', filters: [{ connector: 'AND', conditions: [{ column: 'Phone number', operator: 'IS', values: [phone] }] }] } }, signal), phone);
   }
 
   async function contactGet(id) {
@@ -299,16 +342,16 @@
     return nameCache.get(n);
   }
 
-  async function findContacts(plan, maxPages) {
+  async function findContacts(plan, maxPages, signal) {
     if (plan.exact) {
-      const c = await contactByPhone(plan.exact);
+      const c = await contactByPhone(plan.exact, signal);
       if (c && c.ambiguous) return { found: [], partial: false, ambiguous: true };
       return { found: c && hasAllWords([c.name, c.phone].join(' '), plan.words) ? [c] : [], partial: false };
     }
     const found = new Map();
     let partial = false;
     for (let page = 1; page <= maxPages; page++) {
-      const recs = contactRecords(await read('/api/contacts/search', { pageNo: page, pageSize: 100, condition: plan.condition }));
+      const recs = contactRecords(await read('/api/contacts/search', { pageNo: page, pageSize: 100, condition: plan.condition }, signal));
       for (const r of recs) {
         const name = r['Remark name'] || r.Nickname || '';
         if (hasAllWords([name, r.Nickname, r['Phone number']].join(' '), plan.words)) {
@@ -321,12 +364,12 @@
     return { found: [...found.values()], partial };
   }
 
-  async function openConversations(maxPages) {
+  async function openConversations(maxPages, signal) {
     const list = [];
     let total = null;
     for (let page = 1; page <= maxPages; page++) {
       const res = await read('/api/inbox/conversation/advancedSearch', { pageNo: page, pageSize: 100, order: 'newest',
-        status: 1, query: { filters: [], connector: 'AND' } });
+        status: 1, query: { filters: [], connector: 'AND' } }, signal);
       const conv = accountConversations(res, account.tenant);
       const meta = res.data.meta;
       if (meta && meta.total != null) total = Number(meta.total);
@@ -337,9 +380,9 @@
     return { list, partial: total === null || !Number.isFinite(total) || list.length < total };
   }
 
-  async function lastClosed(contactId) {
+  async function lastClosed(contactId, signal) {
     const conv = accountConversations(await read('/api/inbox/conversation/advancedSearch', { pageNo: 1, pageSize: 1,
-      order: 'newest', status: 0, contactId, query: { filters: [], connector: 'AND' } }), account.tenant);
+      order: 'newest', status: 0, contactId, query: { filters: [], connector: 'AND' } }, signal), account.tenant);
     if (conv[0] && String(conv[0].contactId) !== String(contactId)) throw new Error(INCONCLUSIVE);
     return conv[0] || null;
   }
@@ -748,16 +791,18 @@
     p.append(input, filter, out);
     input.focus();
 
-    let runs = 0;
+    const runs = makeSearchRuns();
     async function run() {
-      const mine = ++runs;                                          // a newer search wins over an older one
+      const me = runs.start();                                      // a newer search cancels the reads of the older one
+      const signal = me.ctrl.signal;
       const plan = searchPlan(input.value);
       if (!plan.exact && !plan.words.length) { out.textContent = 'Escribe al menos una palabra o un número.'; return; }
       out.textContent = 'Buscando…';
       try {
         const epoch = await guard();
-        const [res, open] = await Promise.all([findContacts(plan, 5), openConversations(10)]);
-        if (mine !== runs) return;
+        if (!runs.isCurrent(me)) return;
+        const [res, open] = await Promise.all([findContacts(plan, 5, signal), openConversations(10, signal)]);
+        if (!runs.isCurrent(me)) return;
         const convs = new Map();
         open.list.forEach((c) => {
           const k = String(c.contactId);
@@ -784,9 +829,9 @@
         const unchecked = filter.value === 'closed' ? Math.max(0, shown.length - 50) : 0;
         const closed = new Map();
         const ask = filter.value === 'closed' ? shown.slice(0, 50) : shown.filter((c) => !live(c.id)).slice(0, 20);
-        await pool(ask, 5, async (c) => closed.set(c.id, await lastClosed(c.id)));
+        await pool(ask, 5, async (c) => { if (runs.isCurrent(me)) closed.set(c.id, await lastClosed(c.id, signal)); });
         stillSame(epoch);
-        if (mine !== runs || !p.isConnected) return;
+        if (!runs.isCurrent(me) || !p.isConnected) return;
         if (filter.value === 'closed') shown = shown.slice(0, 50).filter((c) => closed.get(c.id));
         const more = Math.max(0, shown.length - 50);
         shown = shown.slice(0, 50);
@@ -815,14 +860,19 @@
         });
         if (more) muted(out, 'Y ' + more + ' más: añade otra palabra.');
       } catch (e) {
-        if (mine === runs && p.isConnected) out.textContent = 'No se pudo buscar: ' + e.message;
+        if (runs.isCurrent(me) && p.isConnected) out.textContent = 'No se pudo buscar: ' + e.message;
       }
     }
 
-    input.addEventListener('keydown', (ev) => { if (ev.key === 'Enter') run(); });
+    // searching while typing (makeTyping): half a second after the last change, from three characters; a change of
+    // the text cancels the search in flight and clears what was shown; Enter and a change of filter search at once
+    const typing = makeTyping({ delay: 500, minChars: 3, schedule: (fn, ms) => setTimeout(fn, ms), unschedule: (id) => clearTimeout(id),
+      search: () => { if (p.isConnected) run(); }, invalidate: () => { runs.cancel(); out.textContent = ''; } });
+    input.addEventListener('keydown', (ev) => { if (ev.key === 'Enter') typing.enter(input.value); });
+    input.addEventListener('input', () => typing.input(input.value));
     filter.addEventListener('change', () => {
       try { localStorage.setItem(FILTER, filter.value); } catch (e) { /* not kept: fine */ }
-      if (input.value.trim()) run();
+      typing.filterChanged(input.value);
     });
   }
 
