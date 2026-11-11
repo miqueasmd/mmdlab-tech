@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         YCloud: ayudas para la bandeja (MMD Lab)
 // @namespace    https://mmdlab.tech/
-// @version      0.5.3
+// @version      0.5.4
 // @description  Vínculos cliente-vendedor que se pulsan, búsqueda por palabras o número y chats en espera en color en la bandeja de YCloud. Solo lee: no escribe nada.
 // @match        https://www.ycloud.com/console/*
 // @run-at       document-idle
@@ -64,6 +64,9 @@
   // for searching: capitals, no accents (Ñ -> N), single spaces
   const plain = (s) => String(s || '').normalize('NFD').replace(MARKS, '').toUpperCase().replace(/\s+/g, ' ').trim();
   const ROLE_WORDS = /^(VENDEDOR|VENDEDORA|VENDEDORES|CLIENTE|CLIENTES)$/;   // in hundreds of names: a poor word to ask for
+  const PAGE = 100;        // contacts a page of the console's search
+  const MAX_PAGES = 5;     // pages read per word before the answer is called partial
+  const MAX_READS = 10;    // pages read per search in all, whatever the number of words (the reviewer, 2026-11-11)
   function e164(raw) {
     const text = String(raw || '').trim();
     let digits = text.replace(/\D/g, '');
@@ -79,21 +82,66 @@
   const hasAllWords = (text, words) => words.every((w) => plain(text).includes(plain(w)));
 
   function searchPlan(input) {
-    // A whole number is searched exactly. Otherwise the console is asked for the longest word with letters (it finds a
-    // number only when whole, so a piece of one cannot be what is asked), and every word must then be in the contact's
-    // name, nickname or number; «pieces» says whether a piece of a number was typed.
+    // A whole number is searched exactly. Otherwise the console is asked for one word at a time («conditions», in the
+    // order to try: the words with letters that name no role, longest first, then the role words; it finds a number
+    // only when whole, so a piece of one is asked for only when nothing else was typed), and every word must then be
+    // in the contact's name, nickname or number; «pieces» says whether a piece of a number was typed.
     const text = String(input || '').trim();
     const m = text.match(/\+?\d[\d\s().-]{7,}\d/);
     const exact = m ? e164(m[0]) : null;
     const words = (exact ? text.replace(m[0], ' ') : text).split(/\s+/)
       .map((w) => (/^[+\d().-]+$/.test(w) ? w.replace(/\D/g, '') : w)).filter((w) => w.length > 1);
-    const longest = (list) => [...list].sort((a, b) => b.length - a.length)[0] || null;
+    const byLength = (list) => [...list].sort((a, b) => b.length - a.length);
     // the words that name a role are in hundreds of contacts («VENDEDOR …» is how sellers are named), so they are
-    // asked for only when nothing else was typed: any other word narrows the console's answer far more
+    // asked for only after every other word: any other word narrows the console's answer far more
     const lettered = words.filter((w) => /\D/.test(w));
     const telling = lettered.filter((w) => !ROLE_WORDS.test(plain(w)));
-    const condition = exact ? null : longest(telling) || longest(lettered) || longest(words);
-    return { exact, words, condition, pieces: !exact && words.some((w) => /^\d{3,}$/.test(w)) };
+    const roles = lettered.filter((w) => ROLE_WORDS.test(plain(w)));
+    const seen = new Set();
+    const conditions = exact ? [] : [...byLength(telling), ...byLength(roles)].filter((w) => !seen.has(plain(w)) && seen.add(plain(w)));
+    if (!exact && !conditions.length && words.length) conditions.push(byLength(words)[0]);
+    return { exact, words, condition: conditions[0] || null, conditions, pieces: !exact && words.some((w) => /^\d{3,}$/.test(w)) };
+  }
+
+  async function searchContacts(plan, maxPages, fetchPage, maxReads = MAX_READS) {
+    // The console is asked for one word at a time (plan.conditions, in order), PAGE contacts a page, and every word
+    // must then be in the contact's name, nickname or number. Which word has the fewest contacts is not known in
+    // advance (a city is in hundreds of names, a model code in a few), so page 1 of each word is read first: the
+    // first word that fits in one page gives a complete answer at one read. Only when every word fills its first
+    // page are the next pages read, word by word up to maxPages, until one word completes. A contact with all the
+    // words contains each of them, so a complete read of any one word holds every match, and whatever the cut reads
+    // found is kept too. The whole search reads at most maxReads pages, however many words were typed. «partial»
+    // says no word completed (its pages or the budget ran out); «cut» names the words whose reads were cut.
+    const found = new Map();
+    const take = (recs) => {
+      for (const r of recs) {
+        const name = r['Remark name'] || r.Nickname || '';
+        if (hasAllWords([name, r.Nickname, r['Phone number']].join(' '), plan.words)) {
+          found.set(String(r.contactId), { id: String(r.contactId), phone: r['Phone number'], name: name || r['Phone number'] });
+        }
+      }
+    };
+    const done = (partial, cut) => ({ found: [...found.values()], partial, cut });
+    const candidates = plan.conditions || (plan.condition ? [plan.condition] : []);
+    let reads = 0;
+    const read = async (word, page) => { reads++; return fetchPage(word, page); };
+    const started = [];
+    for (const word of candidates) {
+      if (reads >= maxReads) return done(true, started);
+      const recs = await read(word, 1);
+      started.push(word);
+      take(recs);
+      if (recs.length < PAGE) return done(false, []);
+    }
+    for (const word of candidates) {
+      for (let page = 2; page <= maxPages && reads < maxReads; page++) {
+        const recs = await read(word, page);
+        take(recs);
+        if (recs.length < PAGE) return done(false, []);
+      }
+      if (reads >= maxReads) break;
+    }
+    return done(candidates.length > 0, started);   // every word read and none complete: all of them were cut
   }
 
   function waitState(conv, now) {
@@ -260,7 +308,7 @@
     return { tenant, active: Boolean(tenant && allowed[tenant]), epoch: changed ? state.epoch + 1 : state.epoch, changed };
   }
 
-  const helpers = { plain, e164, splitNumbers, hasAllWords, searchPlan, waitState, pickContact, contactRecords,
+  const helpers = { plain, e164, splitNumbers, hasAllWords, searchPlan, searchContacts, waitState, pickContact, contactRecords,
     contactCard, accountConversations, countFromPage, noRowsMessage, makeSearchRuns, makeTyping, rowConversation, tenantStep,
     INCONCLUSIVE };
   if (typeof module !== 'undefined' && module.exports) { module.exports = helpers; return; }   // node tests
@@ -348,20 +396,8 @@
       if (c && c.ambiguous) return { found: [], partial: false, ambiguous: true };
       return { found: c && hasAllWords([c.name, c.phone].join(' '), plan.words) ? [c] : [], partial: false };
     }
-    const found = new Map();
-    let partial = false;
-    for (let page = 1; page <= maxPages; page++) {
-      const recs = contactRecords(await read('/api/contacts/search', { pageNo: page, pageSize: 100, condition: plan.condition }, signal));
-      for (const r of recs) {
-        const name = r['Remark name'] || r.Nickname || '';
-        if (hasAllWords([name, r.Nickname, r['Phone number']].join(' '), plan.words)) {
-          found.set(String(r.contactId), { id: String(r.contactId), phone: r['Phone number'], name: name || r['Phone number'] });
-        }
-      }
-      if (recs.length < 100) break;
-      if (page === maxPages) partial = true;
-    }
-    return { found: [...found.values()], partial };
+    return searchContacts(plan, maxPages, async (condition, pageNo) =>
+      contactRecords(await read('/api/contacts/search', { pageNo, pageSize: PAGE, condition }, signal)));
   }
 
   async function openConversations(maxPages, signal) {
@@ -801,7 +837,7 @@
       try {
         const epoch = await guard();
         if (!runs.isCurrent(me)) return;
-        const [res, open] = await Promise.all([findContacts(plan, 5, signal), openConversations(10, signal)]);
+        const [res, open] = await Promise.all([findContacts(plan, MAX_PAGES, signal), openConversations(10, signal)]);
         if (!runs.isCurrent(me)) return;
         const convs = new Map();
         open.list.forEach((c) => {
@@ -838,7 +874,8 @@
         out.textContent = '';
         const openCut = open.partial && (filter.value !== 'all' || plan.pieces);
         if (plan.pieces) muted(out, 'Un trozo de número lo busco solo entre las conversaciones abiertas: YCloud solo encuentra números enteros.');
-        if (res.partial) muted(out, '⚠ Resultados parciales: hay más contactos con «' + plan.condition + '» de los que leo. Añade otra palabra.');
+        if (res.partial) muted(out, '⚠ Resultados parciales: he llegado al límite de lecturas con ' + res.cut.map((w) => '«' + w + '»').join(' y con ')
+          + ' y puede faltar alguno. Añade otra palabra o usa una más concreta.');
         if (openCut) muted(out, '⚠ No he podido leer todas las conversaciones abiertas: puede faltar alguno.');
         if (notCounted) muted(out, '⚠ De ' + notCounted + ' con conversación abierta no sé si su número de empresa está conectado: no los cuento.');
         if (unchecked) muted(out, '⚠ He mirado las cerradas de los 50 primeros; quedan ' + unchecked + ' sin mirar. Añade otra palabra.');
