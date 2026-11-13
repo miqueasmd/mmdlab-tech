@@ -420,6 +420,9 @@ export default function LandingPage() {
               <a href={lang === "es" ? "/privacidad/" : "/en/privacy/"} className="text-slate-400 hover:text-purple-400 transition-colors">
                 {t("privacy_policy")}
               </a>
+              <a href={lang === "es" ? "/condiciones/" : "/en/terms/"} className="text-slate-400 hover:text-purple-400 transition-colors">
+                {t("terms_of_service")}
+              </a>
             </div>
           </div>
         </div>
