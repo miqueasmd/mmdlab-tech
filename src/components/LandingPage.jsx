@@ -438,7 +438,7 @@ const services = [
 
 // Figures given by the owner (2026-11-13): 39 projects on Upwork and about 12 on Malt; satisfaction as he states it
 const stats = [
-  { value: "+50", label: "projects_completed" },
+  { value: "50+", label: "projects_completed" },
   { value: "100%", label: "client_satisfaction" },
   { value: "EN / ES / FR", label: "trilingual_support" },
 ];
