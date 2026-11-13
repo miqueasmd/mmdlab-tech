@@ -146,7 +146,7 @@ export default function LandingPage() {
         >
           {stats.map((stat, index) => (
             <div key={index} className="text-center">
-              <div className="text-3xl md:text-4xl font-bold text-purple-400 mb-2">{stat.value}</div>
+              <div className="text-3xl md:text-4xl font-bold text-purple-400 mb-2">{typeof stat.value === "object" ? stat.value[lang] : stat.value}</div>
               <div className="text-sm text-slate-400">{t(stat.label)}</div>
             </div>
           ))}
@@ -436,9 +436,9 @@ const services = [
   { icon: Cloud, key: "cloud" },
 ];
 
-// Figures given by the owner (2026-11-13): 39 projects on Upwork and about 12 on Malt; satisfaction as he states it
+// Figures given by the owner (2026-11-13); the plus sign goes after the number in English and before it in Spanish: 39 projects on Upwork and about 12 on Malt; satisfaction as he states it
 const stats = [
-  { value: "50+", label: "projects_completed" },
+  { value: { en: "50+", es: "+50" }, label: "projects_completed" },
   { value: "100%", label: "client_satisfaction" },
   { value: "EN / ES / FR", label: "trilingual_support" },
 ];
