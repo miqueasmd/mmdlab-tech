@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Bot, Cloud, Lightbulb, ArrowRight, Search, Layout, Link2, TrendingUp, Youtube, Instagram, Facebook, Linkedin } from "lucide-react";
+import { Bot, Cloud, Lightbulb, ArrowRight, Search, Layout, Link2, TrendingUp } from "lucide-react";
 import en from '../i18n/en.json';
 import es from '../i18n/es.json';
 
@@ -404,23 +404,9 @@ export default function LandingPage() {
       {/* Footer */}
       <footer className="relative z-10 text-center py-8 border-t border-purple-500/20">
         <div className="max-w-4xl mx-auto px-6">
-          <div className="flex justify-center gap-6 mb-6">
-            {socials.map(({ icon: Icon, href, label }) => (
-              <a
-                key={href}
-                href={href}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={label}
-                className="text-slate-400 hover:text-purple-400 transition-colors"
-              >
-                <Icon className="w-6 h-6" />
-              </a>
-            ))}
-          </div>
           <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-4">
             <p className="text-slate-400">
-              © 2026 Miqueas Molina Delgado • <a href="https://portfolio.mmdlab.tech" target="_blank" rel="noopener noreferrer" className="text-purple-400 hover:text-purple-300 transition-colors">Portfolio</a>
+              © 2026 Miqueas Molina Delgado • <a href="https://portfolio.mmdlab.tech" target="_blank" rel="noopener noreferrer" className="text-purple-400 hover:text-purple-300 transition-colors">Portfolio</a> • <a href="https://www.linkedin.com/in/miqueas-molina-ai-solutions-engineer-agents-automation" target="_blank" rel="noopener noreferrer" className="text-purple-400 hover:text-purple-300 transition-colors">LinkedIn</a>
             </p>
             {/* Static pages in public/, readable without JavaScript */}
             <div className="flex flex-wrap justify-center gap-6 text-sm">
@@ -455,11 +441,4 @@ const stats = [
   { value: "+50", label: "projects_completed" },
   { value: "100%", label: "client_satisfaction" },
   { value: "EN / ES / FR", label: "trilingual_support" },
-];
-
-const socials = [
-  { icon: Youtube, href: "https://www.youtube.com/@MMDLab", label: "YouTube" },
-  { icon: Instagram, href: "https://www.instagram.com/mmdlab.tech/", label: "Instagram" },
-  { icon: Facebook, href: "https://www.facebook.com/mmdlab.tech", label: "Facebook" },
-  { icon: Linkedin, href: "https://www.linkedin.com/in/miqueas-molina-ai-solutions-engineer-agents-automation", label: "LinkedIn" },
 ];
