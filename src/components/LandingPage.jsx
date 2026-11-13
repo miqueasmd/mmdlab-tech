@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Brain, Bot, Cloud, ArrowRight, Search, Layout, Link2, TrendingUp } from "lucide-react";
-import React from 'react';
+import { Bot, Cloud, Lightbulb, ArrowRight, Search, Layout, Link2, TrendingUp, Youtube, Instagram, Facebook, Linkedin } from "lucide-react";
 import en from '../i18n/en.json';
 import es from '../i18n/es.json';
 
@@ -60,9 +59,12 @@ export default function LandingPage() {
         <motion.h1 
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
-          className="text-3xl font-bold tracking-wide bg-gradient-to-r from-white to-purple-300 bg-clip-text text-transparent"
+          className="flex items-center gap-3 text-3xl font-bold tracking-wide"
         >
-          MMD<span className="text-purple-400">Lab</span>
+          <img src="/favicon.png" alt="" className="w-10 h-10 rounded-full" />
+          <span className="bg-gradient-to-r from-white to-purple-300 bg-clip-text text-transparent">
+            MMD<span className="text-purple-400">Lab</span>
+          </span>
         </motion.h1>
         <nav className="flex gap-6 items-center">
           <button 
@@ -140,7 +142,7 @@ export default function LandingPage() {
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
           viewport={{ once: true }}
-          className="grid grid-cols-2 md:grid-cols-4 gap-8"
+          className="grid grid-cols-1 sm:grid-cols-3 gap-8"
         >
           {stats.map((stat, index) => (
             <div key={index} className="text-center">
@@ -189,10 +191,7 @@ export default function LandingPage() {
             </motion.div>
           ))}
         </div>
-        {/* Animated Counters below services */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-10">
-          <AnimatedCounters lang={lang} />
-        </div>
+        <p className="text-center text-slate-400 mt-10">{t("training_note")}</p>
       </section>
 
       {/* Alternating Steps Section */}
@@ -405,6 +404,20 @@ export default function LandingPage() {
       {/* Footer */}
       <footer className="relative z-10 text-center py-8 border-t border-purple-500/20">
         <div className="max-w-4xl mx-auto px-6">
+          <div className="flex justify-center gap-6 mb-6">
+            {socials.map(({ icon: Icon, href, label }) => (
+              <a
+                key={href}
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={label}
+                className="text-slate-400 hover:text-purple-400 transition-colors"
+              >
+                <Icon className="w-6 h-6" />
+              </a>
+            ))}
+          </div>
           <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-4">
             <p className="text-slate-400">
               © 2026 Miqueas Molina Delgado • <a href="https://portfolio.mmdlab.tech" target="_blank" rel="noopener noreferrer" className="text-purple-400 hover:text-purple-300 transition-colors">Portfolio</a>
@@ -433,66 +446,20 @@ export default function LandingPage() {
 
 const services = [
   { icon: Bot, key: "automation" },
+  { icon: Lightbulb, key: "consulting" },
   { icon: Cloud, key: "cloud" },
-  { icon: Brain, key: "training" },
 ];
 
+// Figures given by the owner (2026-11-13): 39 projects on Upwork and about 12 on Malt; satisfaction as he states it
 const stats = [
-  { value: "38", label: "projects_completed" },
-  { value: "99%", label: "client_satisfaction" },
-  { value: "EN/ES", label: "bilingual_support" },
-  { value: "∞", label: "possible_integrations" },
+  { value: "+50", label: "projects_completed" },
+  { value: "100%", label: "client_satisfaction" },
+  { value: "EN / ES / FR", label: "trilingual_support" },
 ];
 
-// Component for related counters
-// Slow animation: 2 seconds per unit
-// Animate money by 1 each time, synchronized with hours
-function AnimatedCounters({ lang }) {
-  const [hours, setHours] = useState(100);
-  const [money, setMoney] = useState(10000);
-  // Slow animation: 2 seconds per unit
-  React.useEffect(() => {
-    if (hours < 300) {
-      const timeout = setTimeout(() => setHours(hours + 1), 2000);
-      return () => clearTimeout(timeout);
-    }
-  }, [hours]);
-  // Animate money by 1 each time, synchronized with hours
-  React.useEffect(() => {
-    const target = hours * 100;
-    const diff = target - money;
-    if (diff > 0) {
-      const intervalMs = 2000 / diff; // distribute the 2s among the remaining dollars/euros
-      const interval = setInterval(() => {
-        setMoney((prev) => {
-          if (prev + 1 >= target) return target;
-          return prev + 1;
-        });
-      }, intervalMs);
-      return () => clearInterval(interval);
-    }
-  }, [hours, money]);
-  const rawProductivity = 2 + (hours - 100) * 0.5;
-  const productivity = Number.isInteger(rawProductivity) ? rawProductivity : rawProductivity.toFixed(1);
-  const labels = {
-    time: { es: 'Gana tiempo', en: 'Save time' },
-    money: { es: 'Ahorra dinero', en: 'Save money' },
-    productivity: { es: 'Productividad', en: 'Productivity' },
-  };
-  return (
-    <>
-      <div className="text-center">
-        <div className="text-3xl md:text-4xl font-bold text-purple-400 mb-2">{hours}h</div>
-        <div className="text-sm text-slate-400">{labels.time[lang]}</div>
-      </div>
-      <div className="text-center">
-        <div className="text-3xl md:text-4xl font-bold text-purple-400 mb-2">{lang === 'es' ? '€' : '$'}{money.toLocaleString()}</div>
-        <div className="text-sm text-slate-400">{labels.money[lang]}</div>
-      </div>
-      <div className="text-center">
-        <div className="text-3xl md:text-4xl font-bold text-purple-400 mb-2">{productivity}x</div>
-        <div className="text-sm text-slate-400">{labels.productivity[lang]}</div>
-      </div>
-    </>
-  );
-} 
+const socials = [
+  { icon: Youtube, href: "https://www.youtube.com/@MMDLab", label: "YouTube" },
+  { icon: Instagram, href: "https://www.instagram.com/mmdlab.tech/", label: "Instagram" },
+  { icon: Facebook, href: "https://www.facebook.com/mmdlab.tech", label: "Facebook" },
+  { icon: Linkedin, href: "https://www.linkedin.com/in/miqueas-molina-ai-solutions-engineer-agents-automation", label: "LinkedIn" },
+];
